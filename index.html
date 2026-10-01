@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Shop · SwiftCart</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="assets/style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="nav"></div>
+    <main class="container py-4">
+      <section class="hero p-4 p-md-5 mb-4">
+        <div class="row align-items-center g-4">
+          <div class="col-md-7">
+            <h1>Shop fast. Pay on delivery. Done.</h1>
+            <p class="sub my-3">
+              Fresh stock from local sellers, updated live. Find what you need in seconds.
+            </p>
+            <div class="hero-search d-flex">
+              <input id="q" class="form-control" placeholder="Search earbuds, hoodies, lamps…" aria-label="Search products">
+              <button class="btn btn-primary" id="go"><i class="bi bi-search"></i></button>
+            </div>
+          </div>
+          <div class="col-md-5 d-none d-md-block">
+            <div class="stack">
+              <div class="t t1">🎧</div>
+              <div class="t t2">⌚</div>
+              <div class="t t3">🧥</div>
+              <div class="t t4">☕</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="d-flex flex-wrap gap-2 mb-4" id="chips"></div>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 m-0" id="ttl">All products</h2>
+        <select id="sort" class="form-select w-auto">
+          <option value="">Featured</option>
+          <option value="a">Price: low to high</option>
+          <option value="d">Price: high to low</option>
+        </select>
+      </div>
+      <div class="row g-3" id="grid"></div>
+      <div class="row g-3 mt-4">
+        <div class="col-md-4">
+          <div class="card-s p-3">
+            <i class="bi bi-truck fs-3 text-primary"></i>
+            <h3 class="h6 mt-2">Free delivery over Rs. 15,000</h3>
+            <small class="text-secondary">Flat Rs. 250 on smaller orders.</small>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card-s p-3">
+            <i class="bi bi-cash-coin fs-3 text-primary"></i>
+            <h3 class="h6 mt-2">Cash on delivery</h3>
+            <small class="text-secondary">Pay when your order arrives.</small>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card-s p-3">
+            <i class="bi bi-arrow-repeat fs-3 text-primary"></i>
+            <h3 class="h6 mt-2">7-day returns</h3>
+            <small class="text-secondary">Changed your mind? Send it back.</small>
+          </div>
+        </div>
+      </div>
+    </main>
+    <div id="foot"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/app.js"></script>
+    <script>
+      let cat = 'All';
+      const g = $('#grid');
+      function draw() {
+        const q = $('#q').value.trim().toLowerCase(), so = $('#sort').value;
+        let l = PRODUCTS.filter(p => (cat == 'All' || p.c == cat) && p.n.toLowerCase().includes(q));
+        if (so)
+          l.sort((a, b) => so == 'a' ? a.p - b.p : b.p - a.p);
+        $('#ttl').textContent = (cat == 'All' ? 'All products' : cat) + ' (' + l.length + ')';
+        g.innerHTML = l.length ? l.map(card).join('') : '<div class="col-12 text-center py-5 text-secondary"><i class="bi bi-search fs-1"></i>'
+          + '<p class="mt-2">No products match "' + q + '". Try a different word or category.</p></div>';
+      }
+      $('#chips').innerHTML = CATS.map(c => '<button class="chip' + (c == 'All' ? ' on' : '') + '">' + c + '</button>').join('');
+      $('#chips').onclick = e => {
+        if (!e.target.classList.contains('chip'))
+          return;
+        $$('.chip').forEach(x => x.classList.remove('on'));
+        e.target.classList.add('on');
+        cat = e.target.textContent;
+        draw();
+      };
+      $('#q').oninput = draw;
+      $('#go').onclick = draw;
+      $('#sort').onchange = draw;
+      draw();
+    </script>
+  </body>
+</html>

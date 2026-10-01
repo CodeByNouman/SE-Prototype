@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Cart · SwiftCart</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="assets/style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="nav"></div>
+    <main class="container py-4">
+      <h1 class="h3 mb-4">Your cart</h1>
+      <div id="wrap"></div>
+    </main>
+    <div id="foot"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/app.js"></script>
+    <script>
+      function draw() {
+        const c = cart(), ids = Object.keys(c);
+        if (!ids.length) {
+          $('#wrap').innerHTML = '<div class="card-s text-center p-5"><i class="bi bi-bag fs-1 text-secondary"></i>'
+            + '<h2 class="h5 mt-2">Your cart is empty</h2>'
+            + '<p class="text-secondary">Add something you like and it will show up here.</p><a href="index.html" class="btn btn-primary">Browse products</a>'
+            + '</div>';
+          badge();
+          return;
+        }
+        let sub = 0;
+        const rows = ids.map(id => {
+          const p = byId(id), q = c[id];
+          sub += p.p * q;
+          return `<div class="card-s p-3 mb-2 d-flex gap-3 align-items-center flex-wrap">
+           <div class="pimg rounded-3" style="background:${p.bg};width:76px;aspect-ratio:1;font-size:2.2rem">${p.e}</div>
+      <div class="flex-grow-1"><a href="product.html?id=${id}" class="fw-semibold text-dark text-decoration-none">${p.n}</a><div class="small text-secondary">${fmt(p.p)} each</div>
+           </div>
+      <div class="input-group w-auto"><button class="btn btn-outline-dark btn-sm" onclick="chg(${id},-1)">−</button><span class="input-group-text bg-white">${q}</span><button class="btn btn-outline-dark btn-sm" onclick="chg(${id},1)">+</button>
+           </div>
+      <div class="price" style="min-width:110px;text-align:right">${fmt(p.p * q)}</div><button class="btn btn-link text-danger" aria-label="Remove" onclick="rm(${id})"><i class="bi bi-trash"></i></button></div>`;
+        }).join('');
+        const tax = Math.round(sub * .1), ship = sub >= 15000 ? 0 : 250;
+        set('sc_totals', {
+          sub, tax, ship, total: sub + tax + ship
+        });
+        $('#wrap').innerHTML = `<div class="row g-4"><div class="col-lg-8">${rows}</div>
+         <div class="col-lg-4">
+         <div class="card-s p-4">
+         <h2 class="h5">Order summary</h2>
+      <div class="d-flex justify-content-between mt-3"><span>Subtotal</span><span>${fmt(sub)}</span>
+         </div>
+         <div class="d-flex justify-content-between"><span>Tax (10%)</span><span>${fmt(tax)}</span>
+         </div>
+      <div class="d-flex justify-content-between"><span>Shipping</span><span>${ship ? fmt(ship) : 'Free'}</span>
+         </div>
+         <hr>
+         <div class="d-flex justify-content-between price fs-5"><span>Total</span><span>${fmt(sub + tax + ship)}</span>
+         </div>
+      <a href="checkout.html" class="btn btn-primary w-100 mt-3">Go to checkout</a><a href="index.html" class="btn btn-link w-100">Keep shopping</a>
+         </div>
+         </div>
+         </div>`;
+        badge();
+      }
+      function chg(id, d) {
+        const c = cart(), p = byId(id), n = c[id] + d;
+        if (n < 1)
+          return rm(id);
+        if (n > p.s)
+          return toast('Only ' + p.s + ' in stock', 'warning');
+        c[id] = n;
+        set('sc_cart', c);
+        draw();
+      }
+      function rm(id) {
+        const c = cart();
+        delete c[id];
+        set('sc_cart', c);
+        draw();
+        toast('Item removed', 'danger');
+      }
+      draw();
+    </script>
+  </body>
+</html>
